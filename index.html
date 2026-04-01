@@ -8,8 +8,8 @@
     <style>
         body { font-family: 'Helvetica', Arial, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
         .header { text-align: center; margin-bottom: 30px; }
-        .controls { text-align: center; margin-bottom: 20px; }
-        select { padding: 10px 15px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; }
+        .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        select { padding: 10px 15px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; background: white; }
         .dashboard { display: flex; flex-direction: column; align-items: center; gap: 40px; }
         .chart-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 800px; }
         .loading { text-align: center; font-size: 18px; color: #666; font-weight: bold; margin-top: 50px; }
@@ -23,9 +23,25 @@
 
     <div class="controls" id="controls" style="display: none;">
         <select id="metricSelector" onchange="updateCharts()">
-            <option value="remittances">Remittances</option>
+            <option value="totalBooks">Total Books</option>
             <option value="bookPoints">Book Points</option>
-            <option value="lakshmi">Lakshmi Points</option>
+            <option value="remittances">Remittances</option>
+            <option value="lakshmi">Laxmi Points</option>
+        </select>
+        
+        <select id="monthSelector" onchange="updateCharts()">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
         </select>
     </div>
 
@@ -41,8 +57,8 @@
     </div>
 
     <script>
-        // Replace this with your newly deployed Web App URL
-        const API_URL = "https://script.google.com/a/macros/iskcon.london/s/AKfycbwLijWYWO4JemQBZNj_1oBnYQjIugicvWlOSd4Ip1hjfxk5L0Zg2buOYT05ARyyoGg44w/exec"; 
+        // REMEMBER TO UPDATE WITH YOUR NEW WEB APP URL
+        const API_URL = "https://script.google.com/macros/library/d/1hNj2mpdHiZ7cnoGi--MICNcFtEJX9ALa-ccg0fqxRkaa9bnGIyf6O1ZO/4"; 
         
         let dashboardData = {};
         let mtdChartInstance = null;
@@ -60,8 +76,11 @@
                     currentYearLabel = dashboardData.meta.currentYear;
                     lastYearLabel = dashboardData.meta.lastYear;
                     
+                    // Auto-select the current month in the dropdown
+                    document.getElementById('monthSelector').value = dashboardData.meta.currentMonthIndex;
+                    
                     document.getElementById('loading').style.display = 'none';
-                    document.getElementById('controls').style.display = 'block';
+                    document.getElementById('controls').style.display = 'flex';
                     document.getElementById('dashboard').style.display = 'flex';
                     initCharts();
                 } else {
@@ -97,20 +116,31 @@
         function initCharts() {
             const mtdCtx = document.getElementById('mtdChart').getContext('2d');
             const ytdCtx = document.getElementById('ytdChart').getContext('2d');
+            
+            const initialMetric = document.getElementById('metricSelector').value;
+            const initialMonth = document.getElementById('monthSelector').value;
+            const monthName = document.getElementById('monthSelector').options[initialMonth - 1].text;
 
-            mtdChartInstance = new Chart(mtdCtx, createChartConfig("Month-to-Date", dashboardData.remittances.mtd));
-            ytdChartInstance = new Chart(ytdCtx, createChartConfig("Year-to-Date", dashboardData.remittances.ytd));
+            mtdChartInstance = new Chart(mtdCtx, createChartConfig(`Month-to-Date (${monthName})`, dashboardData[initialMetric].mtd[initialMonth]));
+            ytdChartInstance = new Chart(ytdCtx, createChartConfig("Year-to-Date", dashboardData[initialMetric].ytd));
         }
 
         function updateCharts() {
             const selectedMetric = document.getElementById('metricSelector').value;
+            const selectedMonth = document.getElementById('monthSelector').value;
+            const monthName = document.getElementById('monthSelector').options[selectedMonth - 1].text;
+            
             const newData = dashboardData[selectedMetric];
 
-            mtdChartInstance.data.datasets[0].data = newData.mtd.y1;
-            mtdChartInstance.data.datasets[1].data = newData.mtd.target;
-            mtdChartInstance.data.datasets[2].data = newData.mtd.y2;
+            // 1. Update MTD Chart (Changes based on both Metric AND Month)
+            mtdChartInstance.data.labels = newData.mtd[selectedMonth].labels;
+            mtdChartInstance.data.datasets[0].data = newData.mtd[selectedMonth].y1;
+            mtdChartInstance.data.datasets[1].data = newData.mtd[selectedMonth].target;
+            mtdChartInstance.data.datasets[2].data = newData.mtd[selectedMonth].y2;
+            mtdChartInstance.options.plugins.title.text = `Month-to-Date (${monthName})`;
             mtdChartInstance.update();
 
+            // 2. Update YTD Chart (Changes based on Metric ONLY)
             ytdChartInstance.data.datasets[0].data = newData.ytd.y1;
             ytdChartInstance.data.datasets[1].data = newData.ytd.target;
             ytdChartInstance.data.datasets[2].data = newData.ytd.y2;
