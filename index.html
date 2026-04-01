@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Sankirtan Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Helvetica', Arial, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .controls { text-align: center; margin-bottom: 20px; }
+        select { padding: 10px 15px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; }
+        .dashboard { display: flex; flex-direction: column; align-items: center; gap: 40px; }
+        .chart-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 800px; }
+        .loading { text-align: center; font-size: 18px; color: #666; font-weight: bold; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Sankirtan Performance Dashboard</h1>
+    </div>
+
+    <div class="controls" id="controls" style="display: none;">
+        <select id="metricSelector" onchange="updateCharts()">
+            <option value="remittances">Remittances</option>
+            <option value="bookPoints">Book Points</option>
+            <option value="lakshmi">Lakshmi Points</option>
+        </select>
+    </div>
+
+    <div id="loading" class="loading">Fetching live data from Google Sheets...</div>
+
+    <div class="dashboard" id="dashboard" style="display: none;">
+        <div class="chart-container">
+            <canvas id="mtdChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="ytdChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Replace this with your newly deployed Web App URL
+        const API_URL = "https://script.google.com/a/macros/iskcon.london/s/AKfycbwLijWYWO4JemQBZNj_1oBnYQjIugicvWlOSd4Ip1hjfxk5L0Zg2buOYT05ARyyoGg44w/exec"; 
+        
+        let dashboardData = {};
+        let mtdChartInstance = null;
+        let ytdChartInstance = null;
+        let currentYearLabel = "";
+        let lastYearLabel = "";
+
+        async function fetchData() {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+                
+                if(result.status === "success") {
+                    dashboardData = result.data;
+                    currentYearLabel = dashboardData.meta.currentYear;
+                    lastYearLabel = dashboardData.meta.lastYear;
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('controls').style.display = 'block';
+                    document.getElementById('dashboard').style.display = 'flex';
+                    initCharts();
+                } else {
+                    document.getElementById('loading').innerText = "Error loading data: " + result.message;
+                }
+            } catch (error) {
+                document.getElementById('loading').innerText = "Failed to fetch data. Check console.";
+                console.error(error);
+            }
+        }
+
+        function createChartConfig(title, dataObj) {
+            return {
+                type: 'line',
+                data: {
+                    labels: dataObj.labels,
+                    datasets: [
+                        { label: lastYearLabel, data: dataObj.y1, borderColor: '#A0A0A0', borderWidth: 2, fill: false, pointRadius: 0 },
+                        { label: 'Target (+20%)', data: dataObj.target, borderColor: '#228B22', borderDash: [5, 5], borderWidth: 2, fill: false, pointRadius: 0 },
+                        { label: currentYearLabel, data: dataObj.y2, borderColor: '#36A2EB', backgroundColor: 'rgba(54, 162, 235, 0.1)', borderWidth: 3, fill: true, spanGaps: false }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { title: { display: true, text: title, font: { size: 18 } } },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            };
+        }
+
+        function initCharts() {
+            const mtdCtx = document.getElementById('mtdChart').getContext('2d');
+            const ytdCtx = document.getElementById('ytdChart').getContext('2d');
+
+            mtdChartInstance = new Chart(mtdCtx, createChartConfig("Month-to-Date", dashboardData.remittances.mtd));
+            ytdChartInstance = new Chart(ytdCtx, createChartConfig("Year-to-Date", dashboardData.remittances.ytd));
+        }
+
+        function updateCharts() {
+            const selectedMetric = document.getElementById('metricSelector').value;
+            const newData = dashboardData[selectedMetric];
+
+            mtdChartInstance.data.datasets[0].data = newData.mtd.y1;
+            mtdChartInstance.data.datasets[1].data = newData.mtd.target;
+            mtdChartInstance.data.datasets[2].data = newData.mtd.y2;
+            mtdChartInstance.update();
+
+            ytdChartInstance.data.datasets[0].data = newData.ytd.y1;
+            ytdChartInstance.data.datasets[1].data = newData.ytd.target;
+            ytdChartInstance.data.datasets[2].data = newData.ytd.y2;
+            ytdChartInstance.update();
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
