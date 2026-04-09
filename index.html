@@ -1,189 +1,263 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Live Sankirtan Dashboard</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* Professional Dark Theme Variables */
-        :root {
-            --bg-color: #111827;
-            --panel-bg: #1a2240;
-            --text-main: #f4f6ff;
-            --text-muted: #8c9bb4;
-            --border-color: rgba(240,180,41,0.2);
-            --accent-gold: #f0b429;
-            --accent-orange: #e07b10;
-            --accent-green: #34c47c;
-        }
+      /* Professional Dark Theme Variables */
+      :root {
+        --bg-color: #111827;
+        --panel-bg: #1a2240;
+        --text-main: #f4f6ff;
+        --text-muted: #8c9bb4;
+        --border-color: rgba(240, 180, 41, 0.2);
+        --accent-gold: #f0b429;
+        --accent-orange: #e07b10;
+        --accent-green: #34c47c;
+      }
 
-        /* Light Theme Variables */
-        body.light-mode {
-            --bg-color: #f0f4f8;
-            --panel-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border-color: rgba(217,119,6,0.3);
-            --accent-gold: #d97706;
-            --accent-orange: #b45309;
-            --accent-green: #059669;
-        }
+      /* Light Theme Variables */
+      body.light-mode {
+        --bg-color: #f0f4f8;
+        --panel-bg: #ffffff;
+        --text-main: #0f172a;
+        --text-muted: #475569;
+        --border-color: rgba(217, 119, 6, 0.3);
+        --accent-gold: #d97706;
+        --accent-orange: #b45309;
+        --accent-green: #059669;
+      }
 
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
+      .theme-toggle {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
 
-        .theme-toggle:hover {
-            border-color: var(--accent-gold);
-            transform: scale(1.05);
-        }
+      .theme-toggle:hover {
+        border-color: var(--accent-gold);
+        transform: scale(1.05);
+      }
 
-        .theme-toggle svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
+      .theme-toggle svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+      }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-main); 
-            margin: 0; 
-            padding: 30px 20px; 
-            -webkit-font-smoothing: antialiased;
-        }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        margin: 0;
+        padding: 30px 20px;
+        -webkit-font-smoothing: antialiased;
+      }
 
-        .header { 
-            text-align: center; 
-            margin-bottom: 40px; 
-        }
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
 
-        .header h1 {
-            font-weight: 800;
-            font-size: 32px;
-            letter-spacing: -0.5px;
-            margin: 0;
-        }
+      .header h1 {
+        font-weight: 800;
+        font-size: 32px;
+        letter-spacing: -0.5px;
+        margin: 0;
+      }
 
-        .text-gradient {
-            background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+      .text-gradient {
+        background: linear-gradient(
+          135deg,
+          var(--accent-gold),
+          var(--accent-orange)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-        .text-solid {
-            color: var(--text-main);
-        }
+      .text-solid {
+        color: var(--text-main);
+      }
 
-        .controls { 
-            display: flex; 
-            justify-content: center; 
-            flex-wrap: wrap;
-            gap: 15px; 
-            margin-bottom: 40px; 
-        }
+      .controls {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 40px;
+      }
 
-        select { 
-            padding: 12px 24px; 
-            font-size: 14px; 
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            border-radius: 8px; 
-            border: 1px solid var(--border-color); 
-            background-color: var(--panel-bg);
-            color: var(--text-main);
-            cursor: pointer; 
-            outline: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px top 50%;
-            background-size: 10px auto;
-            padding-right: 40px;
-        }
+      select {
+        padding: 12px 24px;
+        font-size: 14px;
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background-color: var(--panel-bg);
+        color: var(--text-main);
+        cursor: pointer;
+        outline: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px top 50%;
+        background-size: 10px auto;
+        padding-right: 40px;
+      }
 
-        select:hover {
-            border-color: var(--accent-gold);
-        }
+      select:hover {
+        border-color: var(--accent-gold);
+      }
 
-        select:focus {
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 0 2px rgba(240, 180, 41, 0.2);
-        }
+      select:focus {
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 0 2px rgba(240, 180, 41, 0.2);
+      }
 
-        .dashboard { 
-            display: grid; 
-            grid-template-columns: 1fr; /* Single column layout for better viewing */
-            gap: 30px; 
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+      .dashboard {
+        display: grid;
+        grid-template-columns: 1fr; /* Single column layout for better viewing */
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-        .chart-panel { 
-            background: var(--panel-bg); 
-            padding: 24px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
+      .chart-panel {
+        background: var(--panel-bg);
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+        position: relative;
+      }
 
-        /* Responsive Canvas Wrappers */
+      /* Responsive Canvas Wrappers */
+      .chart-container {
+        position: relative;
+        height: 50vh; /* Default Desktop Height */
+        width: 100%;
+      }
+
+      /* Table Styles */
+      .table-panel {
+        background: var(--panel-bg);
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+        overflow-x: auto;
+        margin-top: 10px;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .data-table th {
+        color: var(--accent-gold);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .data-table td:first-child,
+      .data-table th:first-child {
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-main);
+      }
+
+      .data-table tr:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+      }
+      .highlight-col {
+        color: var(--accent-orange);
+        font-weight: 600;
+      }
+
+      .loading {
+        text-align: center;
+        font-size: 18px;
+        color: var(--accent-gold);
+        font-weight: 600;
+        margin-top: 100px;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.6;
+        }
+      }
+
+      /* Mobile Adjustments */
+      @media (max-width: 768px) {
         .chart-container {
-            position: relative;
-            height: 50vh; /* Default Desktop Height */
-            width: 100%;
+          height: 40vh;
         }
-
-        .loading { 
-            text-align: center; 
-            font-size: 18px; 
-            color: var(--accent-gold); 
-            font-weight: 600; 
-            margin-top: 100px; 
-            animation: pulse 1.5s infinite;
+        body {
+          padding: 15px 10px;
         }
-
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+        .header h1 {
+          font-size: 24px;
         }
-
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            .chart-container { height: 40vh; }
-            body { padding: 15px 10px; }
-            .header h1 { font-size: 24px; }
-            select { width: 100%; max-width: 300px; }
+        select {
+          width: 100%;
+          max-width: 300px;
         }
+      }
     </style>
-</head>
-<body>
-
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
-        <svg id="themeIcon" viewBox="0 0 24 24">
-            <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18.75a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM6.166 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM2.25 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H3a.75.75 0 01-.75-.75zM6.166 5.106a.75.75 0 00-1.06 1.06l1.59 1.591a.75.75 0 101.061-1.06l-1.59-1.591z" />
-        </svg>
+  </head>
+  <body>
+    <button
+      class="theme-toggle"
+      onclick="toggleTheme()"
+      aria-label="Toggle Theme"
+    >
+      <svg id="themeIcon" viewBox="0 0 24 24">
+        <path
+          d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18.75a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM6.166 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM2.25 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H3a.75.75 0 01-.75-.75zM6.166 5.106a.75.75 0 00-1.06 1.06l1.59 1.591a.75.75 0 101.061-1.06l-1.59-1.591z"
+        />
+      </svg>
     </button>
 
     <div class="header">
@@ -197,289 +271,501 @@
         </tr>
     </div>
 
-    <div class="controls" id="controls" style="display: none;">
-        <select id="metricSelector" onchange="updateCharts()">
-            <option value="totalBooks">Total Books</option>
-            <option value="bookPoints">Book Points</option>
-            <option value="remittances">Remittances</option>
-            <option value="lakshmi">Laxmi Points</option>
-        </select>
-        
-        <select id="monthSelector" onchange="updateCharts()">
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-        </select>
+    <div class="controls" id="controls" style="display: none">
+      <select id="metricSelector" onchange="updateCharts()">
+        <option value="totalBooks">Total Books</option>
+        <option value="bookPoints">Book Points</option>
+        <option value="remittances">Remittances</option>
+        <option value="lakshmi">Laxmi Points</option>
+      </select>
+
+      <select id="monthSelector" onchange="updateCharts()">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
     </div>
 
     <div id="loading" class="loading">Loading live data...</div>
 
-    <div class="dashboard" id="dashboard" style="display: none;">
-        <div class="chart-panel">
-            <div class="chart-container">
-                <canvas id="mtdChart"></canvas>
-            </div>
+    <div class="dashboard" id="dashboard" style="display: none">
+      <div class="chart-panel">
+        <div class="chart-container">
+          <canvas id="mtdChart"></canvas>
         </div>
-        <div class="chart-panel">
-            <div class="chart-container">
-                <canvas id="ytdChart"></canvas>
-            </div>
+      </div>
+      <div class="chart-panel">
+        <div class="chart-container">
+          <canvas id="ytdChart"></canvas>
         </div>
+      </div>
+
+      <!-- NEW DATA TABLE -->
+      <div class="table-panel">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>S</th>
+              <th>M</th>
+              <th>B</th>
+              <th>MB</th>
+              <th>Arabic</th>
+              <th>SB Set</th>
+              <th>CC Set</th>
+              <th class="highlight-col">Book Points</th>
+              <th>Remittances</th>
+              <th class="highlight-col">Total Books</th>
+              <th>Laxmi Points</th>
+              <th style="color: var(--accent-green)">YTD Remittances</th>
+              <th style="color: var(--accent-gold)">BBTx</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <script>
-        // REMEMBER TO PASTE YOUR WEB APP URL HERE
-        const API_URL = "https://script.google.com/macros/s/AKfycbwLijWYWO4JemQBZNj_1oBnYQjIugicvWlOSd4Ip1hjfxk5L0Zg2buOYT05ARyyoGg44w/exec"; 
-        
-        // --- GLOBAL CHART FONT SETTINGS ---
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+      // Connected to live Apps Script API
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycbwLijWYWO4JemQBZNj_1oBnYQjIugicvWlOSd4Ip1hjfxk5L0Zg2buOYT05ARyyoGg44w/exec";
 
-        let dashboardData = {};
-        let mtdChartInstance = null;
-        let ytdChartInstance = null;
-        let currentYearLabel = "";
-        let lastYearLabel = "";
+      // --- GLOBAL CHART FONT SETTINGS ---
+      Chart.defaults.color = "#94a3b8";
+      Chart.defaults.font.family = "'Inter', sans-serif";
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-            
-            const icon = document.getElementById('themeIcon');
-            if (isLight) {
-                icon.innerHTML = '<path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />';
-            } else {
-                icon.innerHTML = '<path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18.75a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM6.166 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM2.25 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H3a.75.75 0 01-.75-.75zM6.166 5.106a.75.75 0 00-1.06 1.06l1.59 1.591a.75.75 0 101.061-1.06l-1.59-1.591z" />';
+      let dashboardData = {};
+      let mtdChartInstance = null;
+      let ytdChartInstance = null;
+      let currentYearLabel = "";
+      let lastYearLabel = "";
+
+      let isFetching = false;
+      async function fetchData() {
+        if (isFetching) return;
+        isFetching = true;
+
+        const loadingDiv = document.getElementById("loading");
+        loadingDiv.style.display = "block";
+        loadingDiv.innerHTML = "Loading live data...";
+
+        try {
+          const response = await fetch(API_URL);
+          const result = await response.json();
+
+          if (result.status === "success" && result.data) {
+            dashboardData = result.data;
+            console.log("Dashboard Data Loaded:", dashboardData);
+
+            currentYearLabel =
+              dashboardData.meta?.currentYear || "Current Year";
+            lastYearLabel = dashboardData.meta?.lastYear || "Last Year";
+
+            if (dashboardData.meta?.currentMonthIndex) {
+              document.getElementById("monthSelector").value =
+                dashboardData.meta.currentMonthIndex;
             }
 
-            Chart.defaults.color = isLight ? '#475569' : '#8c9bb4';
-            
-            if (dashboardData && Object.keys(dashboardData).length > 0) {
-                updateCharts();
-            }
+            loadingDiv.style.display = "none";
+            document.getElementById("controls").style.display = "flex";
+            document.getElementById("dashboard").style.display = "grid";
+            initCharts();
+          } else {
+            loadingDiv.innerText =
+              "Error: " + (result.message || "Invalid data structure");
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          loadingDiv.innerHTML = `
+                    <div style="color: #ff4d4d; margin-bottom: 15px;">Failed to connect to live data.</div>
+                    <button onclick="fetchData()" style="padding: 10px 20px; background: var(--panel-bg); color: var(--accent-blue); border: 1px solid var(--accent-blue); border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        ↻ Try Again
+                    </button>
+                `;
+        } finally {
+          isFetching = false;
         }
+      }
 
-        async function fetchData() {
-            try {
-                const response = await fetch(API_URL);
-                const result = await response.json();
-                
-                if(result.status === "success") {
-                    dashboardData = result.data;
-                    currentYearLabel = dashboardData.meta.currentYear;
-                    lastYearLabel = dashboardData.meta.lastYear;
-                    
-                    document.getElementById('monthSelector').value = dashboardData.meta.currentMonthIndex;
-                    
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('controls').style.display = 'flex';
-                    document.getElementById('dashboard').style.display = 'grid';
-                    initCharts();
-                } else {
-                    document.getElementById('loading').innerText = "Error: " + result.message;
-                }
-            } catch (error) {
-                document.getElementById('loading').innerText = "Failed to fetch data.";
-                console.error(error);
-            }
-        }
+      // Custom config to make it look like an Executive Dashboard
+      function createChartConfig(ctx, title, dataObj, isCurrency = false) {
+        const isLight = document.body.classList.contains("light-mode");
+        const themeColors = {
+          title: isLight ? "#0f172a" : "#f4f6ff",
+          legend: isLight ? "#475569" : "#8c9bb4",
+          tooltipBg: isLight
+            ? "rgba(255, 255, 255, 0.98)"
+            : "rgba(26, 34, 64, 0.98)",
+          tooltipTitle: isLight ? "#0f172a" : "#f4f6ff",
+          tooltipBody: isLight ? "#334155" : "#f4f6ff",
+          tooltipBorder: isLight
+            ? "rgba(217, 119, 6, 0.3)"
+            : "rgba(240,180,41,0.25)",
+          grid: isLight ? "rgba(15, 23, 42, 0.06)" : "rgba(240,180,41,0.08)",
+          ticks: isLight ? "#475569" : "#8c9bb4",
+          lastYearLine: isLight ? "#94a3b8" : "#6b7499",
+          currentYearLine: isLight ? "#d97706" : "#f0b429",
+          targetLine: isLight ? "#059669" : "#34c47c",
+        };
 
-        // Custom config to make it look like an Executive Dashboard
-        function createChartConfig(ctx, title, dataObj, isCurrency = false) {
-            
-            const isLight = document.body.classList.contains('light-mode');
-            const themeColors = {
-                title: isLight ? '#0f172a' : '#f4f6ff',
-                legend: isLight ? '#475569' : '#8c9bb4',
-                tooltipBg: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(26, 34, 64, 0.98)',
-                tooltipTitle: isLight ? '#0f172a' : '#f4f6ff',
-                tooltipBody: isLight ? '#334155' : '#f4f6ff',
-                tooltipBorder: isLight ? 'rgba(217, 119, 6, 0.3)' : 'rgba(240,180,41,0.25)',
-                grid: isLight ? 'rgba(15, 23, 42, 0.06)' : 'rgba(240,180,41,0.08)',
-                ticks: isLight ? '#475569' : '#8c9bb4',
-                lastYearLine: isLight ? '#94a3b8' : '#6b7499',
-                currentYearLine: isLight ? '#d97706' : '#f0b429',
-                targetLine: isLight ? '#059669' : '#34c47c'
-            };
+        // Generate a vibrant glowing gradient for "This Year"
+        let gradientFill = ctx.createLinearGradient(
+          0,
+          0,
+          0,
+          ctx.canvas.clientHeight,
+        );
+        gradientFill.addColorStop(
+          0,
+          isLight ? "rgba(224, 123, 16, 0.2)" : "rgba(240, 180, 41, 0.25)",
+        ); // Gold/Orange top
+        gradientFill.addColorStop(
+          1,
+          isLight ? "rgba(224, 123, 16, 0.0)" : "rgba(240, 180, 41, 0.0)",
+        ); // Faded bottom
 
-            // Generate a vibrant glowing gradient for "This Year"
-            let gradientFill = ctx.createLinearGradient(0, 0, 0, ctx.canvas.clientHeight);
-            gradientFill.addColorStop(0, isLight ? 'rgba(224, 123, 16, 0.2)' : 'rgba(240, 180, 41, 0.25)'); // Gold/Orange top
-            gradientFill.addColorStop(1, isLight ? 'rgba(224, 123, 16, 0.0)' : 'rgba(240, 180, 41, 0.0)'); // Faded bottom
+        // Prepend 0 to make charts start from origin
+        const labels = ["0", ...dataObj.labels];
+        const y1 = [0, ...dataObj.y1];
+        const target = [0, ...dataObj.target];
+        const y2 = [0, ...dataObj.y2];
 
-            // Prepend 0 to make charts start from origin
-            const labels = ['0', ...dataObj.labels];
-            const y1 = [0, ...dataObj.y1];
-            const target = [0, ...dataObj.target];
-            const y2 = [0, ...dataObj.y2];
-
-            return {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { 
-                            label: lastYearLabel, 
-                            data: y1, 
-                            borderColor: themeColors.lastYearLine,
-                            borderWidth: 2, 
-                            fill: false, 
-                            pointRadius: 0,
-                            pointHoverRadius: 5,
-                            tension: 0.3 // Smooth curves
-                        },
-                        { 
-                            label: 'Target (+20%)', 
-                            data: target, 
-                            borderColor: themeColors.targetLine,
-                            borderDash: [5, 5], 
-                            borderWidth: 2, 
-                            fill: false, 
-                            pointRadius: 0,
-                            pointHoverRadius: 5,
-                            tension: 0.3
-                        },
-                        { 
-                            label: currentYearLabel, 
-                            data: y2, 
-                            borderColor: themeColors.currentYearLine,
-                            backgroundColor: gradientFill,
-                            borderWidth: 3, 
-                            fill: true, 
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: themeColors.currentYearLine,
-                            tension: 0.3,
-                            spanGaps: false 
-                        }
-                    ]
+        return {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: lastYearLabel,
+                data: y1,
+                borderColor: themeColors.lastYearLine,
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0.3, // Smooth curves
+              },
+              {
+                label: "Target (+20%)",
+                data: target,
+                borderColor: themeColors.targetLine,
+                borderDash: [5, 5],
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0.3,
+              },
+              {
+                label: currentYearLabel,
+                data: y2,
+                borderColor: themeColors.currentYearLine,
+                backgroundColor: gradientFill,
+                borderWidth: 3,
+                fill: true,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointBackgroundColor: themeColors.currentYearLine,
+                tension: 0.3,
+                spanGaps: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false, // Allows the CSS height to dictate size
+            interaction: {
+              mode: "index", // Tooltip slice through all datasets
+              intersect: false,
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: title,
+                font: { size: 18, weight: 700 },
+                color: themeColors.title,
+                padding: { top: 10, bottom: 10 },
+              },
+              legend: {
+                labels: {
+                  color: themeColors.legend,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  boxWidth: 7,
+                  boxHeight: 7,
+                  padding: 24,
+                  font: { size: 13, weight: 500 },
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // Allows the CSS height to dictate size
-                    interaction: {
-                        mode: 'index', // Tooltip slice through all datasets
-                        intersect: false,
-                    },
-                    plugins: { 
-                        title: { 
-                            display: true, 
-                            text: title, 
-                            font: { size: 18, weight: 700 },
-                            color: themeColors.title,
-                            padding: { top: 10, bottom: 10 }
-                        },
-                        legend: {
-                            labels: {
-                                color: themeColors.legend,
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                boxWidth: 7,
-                                boxHeight: 7,
-                                padding: 24,
-                                font: { size: 13, weight: 500 }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: themeColors.tooltipBg,
-                            titleColor: themeColors.tooltipTitle,
-                            bodyColor: themeColors.tooltipBody,
-                            borderColor: themeColors.tooltipBorder,
-                            borderWidth: 1,
-                            padding: 16,
-                            titleFont: { size: 14, weight: 'bold' },
-                            bodyFont: { size: 13, weight: 500 },
-                            bodySpacing: 10,
-                            titleMarginBottom: 12,
-                            boxPadding: 8,
-                            usePointStyle: true,
-                            itemSort: function(a, b) {
-                                return b.datasetIndex - a.datasetIndex;
-                            },
-                            callbacks: {
-                                // Add commas to large numbers in the tooltip
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) { label += ': '; }
-                                    if (context.parsed.y !== null) {
-                                        let val = new Intl.NumberFormat('en-GB').format(context.parsed.y);
-                                        label += isCurrency ? '£' + val : val;
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { 
-                            grid: { color: themeColors.grid, drawBorder: false }, // Subtle dark/light grid lines
-                            ticks: { color: themeColors.ticks, font: { size: 12, weight: 500 } }
-                        },
-                        y: { 
-                            beginAtZero: true,
-                            grid: { color: themeColors.grid, drawBorder: false },
-                            ticks: { 
-                                color: themeColors.ticks,
-                                font: { size: 12, weight: 500 },
-                                callback: function(value) {
-                                    // Make axis numbers cleaner (e.g. 10k instead of 10000)
-                                    let formatted = value;
-                                    if(value >= 1000) formatted = (value/1000).toFixed(1).replace(/\.0$/, '') + 'k';
-                                    return isCurrency ? '£' + formatted : formatted;
-                                }
-                            }
-                        }
+              },
+              tooltip: {
+                backgroundColor: themeColors.tooltipBg,
+                titleColor: themeColors.tooltipTitle,
+                bodyColor: themeColors.tooltipBody,
+                borderColor: themeColors.tooltipBorder,
+                borderWidth: 1,
+                padding: 16,
+                titleFont: { size: 14, weight: "bold" },
+                bodyFont: { size: 13, weight: 500 },
+                bodySpacing: 10,
+                titleMarginBottom: 12,
+                boxPadding: 8,
+                usePointStyle: true,
+                itemSort: function (a, b) {
+                  return b.datasetIndex - a.datasetIndex;
+                },
+                callbacks: {
+                  // Add commas to large numbers in the tooltip
+                  label: function (context) {
+                    let label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
                     }
-                }
-            };
+                    if (context.parsed.y !== null) {
+                      let val = new Intl.NumberFormat("en-GB").format(
+                        context.parsed.y,
+                      );
+                      label += isCurrency ? "£" + val : val;
+                    }
+                    return label;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: themeColors.grid, drawBorder: false }, // Subtle dark/light grid lines
+                ticks: {
+                  color: themeColors.ticks,
+                  font: { size: 12, weight: 500 },
+                },
+              },
+              y: {
+                beginAtZero: true,
+                grid: { color: themeColors.grid, drawBorder: false },
+                ticks: {
+                  color: themeColors.ticks,
+                  font: { size: 12, weight: 500 },
+                  callback: function (value) {
+                    // Make axis numbers cleaner (e.g. 10k instead of 10000)
+                    let formatted = value;
+                    if (value >= 1000)
+                      formatted =
+                        (value / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+                    return isCurrency ? "£" + formatted : formatted;
+                  },
+                },
+              },
+            },
+          },
+        };
+      }
+
+      // Render the new Data Table
+      function renderTable(month) {
+        if (
+          !dashboardData ||
+          !dashboardData.tableData ||
+          !dashboardData.tableData[month]
+        ) {
+          console.warn("Table data missing for month:", month);
+          return;
+        }
+        const data = dashboardData.tableData[month];
+        const tbody = document.getElementById("tableBody");
+        if (!tbody) return;
+
+        const buildRow = (label, stats, ytdRemTotal) => {
+          if (!stats) return "";
+          const bbtx =
+            stats.rem > 0 ? (stats.lakshmi / stats.rem).toFixed(2) : "0.00";
+          return `<tr>
+                    <td>${label}</td>
+                    <td>${stats.s || 0}</td><td>${stats.m || 0}</td><td>${stats.b || 0}</td><td>${stats.mb || 0}</td><td>${stats.arabic || 0}</td>
+                    <td>${stats.sb || 0}</td><td>${stats.cc || 0}</td>
+                    <td class="highlight-col">${(stats.pts || 0).toLocaleString("en-GB")}</td>
+                    <td>£${(stats.rem || 0).toLocaleString("en-GB")}</td>
+                    <td class="highlight-col">${(stats.totalBooks || 0).toLocaleString("en-GB")}</td>
+                    <td>£${(stats.lakshmi || 0).toLocaleString("en-GB")}</td>
+                    <td style="color: var(--accent-green); font-weight:bold;">£${(ytdRemTotal || 0).toLocaleString("en-GB")}</td>
+                    <td style="color: var(--accent-gold); font-weight:bold;">${bbtx}</td>
+                </tr>`;
+        };
+
+        tbody.innerHTML =
+          buildRow(
+            `MTD (${currentYearLabel})`,
+            data.mtd?.y2,
+            data.ytd?.y2?.rem || 0,
+          ) +
+          buildRow(
+            `MTD (${lastYearLabel})`,
+            data.mtd?.y1,
+            data.ytd?.y1?.rem || 0,
+          ) +
+          buildRow(
+            `YTD (${currentYearLabel})`,
+            data.ytd?.y2,
+            data.ytd?.y2?.rem || 0,
+          ) +
+          buildRow(
+            `YTD (${lastYearLabel})`,
+            data.ytd?.y1,
+            data.ytd?.y1?.rem || 0,
+          );
+      }
+
+      function initCharts() {
+        if (!dashboardData) return;
+
+        const mtdCanvas = document.getElementById("mtdChart");
+        const ytdCanvas = document.getElementById("ytdChart");
+
+        const metricSelector = document.getElementById("metricSelector");
+        const monthSelector = document.getElementById("monthSelector");
+
+        const selectedMetric = metricSelector.value;
+        const selectedMonth = monthSelector.value;
+        const monthName =
+          monthSelector.options[monthSelector.selectedIndex].text;
+
+        const metricData = dashboardData[selectedMetric];
+        if (!metricData) {
+          console.error("Metric data missing for:", selectedMetric);
+          return;
         }
 
-        function initCharts() {
-            const mtdCanvas = document.getElementById('mtdChart');
-            const ytdCanvas = document.getElementById('ytdChart');
-            const mtdCtx = mtdCanvas.getContext('2d');
-            const ytdCtx = ytdCanvas.getContext('2d');
-            
-            const initialMetric = document.getElementById('metricSelector').value;
-            const initialMonth = document.getElementById('monthSelector').value;
-            const monthName = document.getElementById('monthSelector').options[initialMonth - 1].text;
-            
-            const isCurrency = initialMetric === 'remittances' || initialMetric === 'lakshmi';
+        const isCurrency =
+          selectedMetric === "remittances" || selectedMetric === "lakshmi";
 
-            mtdChartInstance = new Chart(mtdCtx, createChartConfig(mtdCtx, `Month-to-Date (${monthName})`, dashboardData[initialMetric].mtd[initialMonth], isCurrency));
-            ytdChartInstance = new Chart(ytdCtx, createChartConfig(ytdCtx, "Year-to-Date", dashboardData[initialMetric].ytd, isCurrency));
+        // Initialize MTD Chart if data exists
+        const mtdData = metricData.mtd ? metricData.mtd[selectedMonth] : null;
+        if (mtdData && mtdCanvas) {
+          const mtdCtx = mtdCanvas.getContext("2d");
+          mtdChartInstance = new Chart(
+            mtdCtx,
+            createChartConfig(
+              mtdCtx,
+              `Month-to-Date (${monthName})`,
+              mtdData,
+              isCurrency,
+            ),
+          );
+        } else {
+          console.warn(
+            "MTD data missing for initCharts",
+            selectedMetric,
+            selectedMonth,
+          );
         }
 
-        function updateCharts() {
-            const selectedMetric = document.getElementById('metricSelector').value;
-            const selectedMonth = document.getElementById('monthSelector').value;
-            const monthName = document.getElementById('monthSelector').options[selectedMonth - 1].text;
-            
-            const newData = dashboardData[selectedMetric];
-            const isCurrency = selectedMetric === 'remittances' || selectedMetric === 'lakshmi';
-
-            // Destroy existing charts to apply formatting changes cleanly
-            if (mtdChartInstance) mtdChartInstance.destroy();
-            if (ytdChartInstance) ytdChartInstance.destroy();
-            
-            const mtdCtx = document.getElementById('mtdChart').getContext('2d');
-            const ytdCtx = document.getElementById('ytdChart').getContext('2d');
-
-            // Recreate charts
-            mtdChartInstance = new Chart(mtdCtx, createChartConfig(mtdCtx, `Month-to-Date (${monthName})`, newData.mtd[selectedMonth], isCurrency));
-            ytdChartInstance = new Chart(ytdCtx, createChartConfig(ytdCtx, "Year-to-Date", newData.ytd, isCurrency));
+        // Initialize YTD Chart if data exists
+        const ytdData = metricData.ytd;
+        if (ytdData && ytdCanvas) {
+          const ytdCtx = ytdCanvas.getContext("2d");
+          ytdChartInstance = new Chart(
+            ytdCtx,
+            createChartConfig(ytdCtx, "Year-to-Date", ytdData, isCurrency),
+          );
+        } else {
+          console.warn("YTD data missing for initCharts", selectedMetric);
         }
 
-        fetchData();
+        renderTable(selectedMonth);
+      }
+
+      function updateCharts() {
+        if (!dashboardData) return;
+
+        const metricSelector = document.getElementById("metricSelector");
+        const monthSelector = document.getElementById("monthSelector");
+
+        const selectedMetric = metricSelector.value;
+        const selectedMonth = monthSelector.value;
+        const monthName =
+          monthSelector.options[monthSelector.selectedIndex].text;
+
+        const metricData = dashboardData[selectedMetric];
+        if (!metricData) return;
+
+        const isCurrency =
+          selectedMetric === "remittances" || selectedMetric === "lakshmi";
+
+        // Destroy existing charts to apply formatting changes cleanly
+        if (mtdChartInstance) mtdChartInstance.destroy();
+        if (ytdChartInstance) ytdChartInstance.destroy();
+
+        const mtdCtx = document.getElementById("mtdChart").getContext("2d");
+        const ytdCtx = document.getElementById("ytdChart").getContext("2d");
+
+        // Recreate charts
+        const mtdData = metricData.mtd ? metricData.mtd[selectedMonth] : null;
+        if (mtdData) {
+          mtdChartInstance = new Chart(
+            mtdCtx,
+            createChartConfig(
+              mtdCtx,
+              `Month-to-Date (${monthName})`,
+              mtdData,
+              isCurrency,
+            ),
+          );
+        }
+
+        const ytdData = metricData.ytd;
+        if (ytdData) {
+          ytdChartInstance = new Chart(
+            ytdCtx,
+            createChartConfig(ytdCtx, "Year-to-Date", ytdData, isCurrency),
+          );
+        }
+
+        // Update Table
+        renderTable(selectedMonth);
+      }
+
+      function toggleTheme() {
+        document.body.classList.toggle("light-mode");
+        const isLight = document.body.classList.contains("light-mode");
+        localStorage.setItem("theme", isLight ? "light" : "dark");
+
+        const icon = document.getElementById("themeIcon");
+        if (isLight) {
+          icon.innerHTML =
+            '<path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />';
+        } else {
+          icon.innerHTML =
+            '<path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18.75a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM6.166 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM2.25 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H3a.75.75 0 01-.75-.75zM6.166 5.106a.75.75 0 00-1.06 1.06l1.59 1.591a.75.75 0 101.061-1.06l-1.59-1.591z" />';
+        }
+
+        Chart.defaults.color = isLight ? "#475569" : "#8c9bb4";
+
+        if (dashboardData && Object.keys(dashboardData).length > 0) {
+          updateCharts();
+        }
+      }
+
+      // Load saved theme
+      if (localStorage.getItem("theme") === "light") {
+        document.body.classList.add("light-mode");
+        const icon = document.getElementById("themeIcon");
+        if (icon) {
+          icon.innerHTML =
+            '<path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />';
+        }
+        Chart.defaults.color = "#475569";
+      }
+
+      fetchData();
     </script>
-</body>
+  </body>
 </html>
