@@ -733,6 +733,47 @@
         const isCurrency =
           selectedMetric === "remittances" || selectedMetric === "lakshmi";
 
+        // --- RENDER SIDE-BY-SIDE MONTHLY BAR CHART ---
+        const barCanvas = document.getElementById("monthlyBarChart");
+        if (barCanvas) {
+          const barCtx = barCanvas.getContext("2d");
+          const monthlyLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          
+          // Map dropdown value to the deduced object properties inside tableData
+          const propertyMap = {
+            totalBooks: "totalBooks",
+            bookPoints: "pts",
+            remittances: "rem",
+            lakshmi: "lakshmi"
+          };
+          const targetProp = propertyMap[selectedMetric];
+        
+          // Pluck discrete monthly totals reliably from the tableData backend arrays
+          const currentYearMonthly = [];
+          const lastYearMonthly = [];
+        
+          for (let m = 1; m <= 12; m++) {
+            const monthObj = dashboardData.tableData?.[m]?.mtd;
+            currentYearMonthly.push(monthObj?.y2?.[targetProp] || 0);
+            lastYearMonthly.push(monthObj?.y1?.[targetProp] || 0);
+          }
+        
+          if (window.monthlyBarChartInstance) {
+            window.monthlyBarChartInstance.destroy();
+          }
+        
+          window.monthlyBarChartInstance = new Chart(
+            barCtx,
+            createBarChartConfig(
+              "Side-by-Side Monthly Comparison",
+              monthlyLabels,
+              currentYearMonthly,
+              lastYearMonthly,
+              isCurrency
+            )
+          );
+        }
+        
         // Initialize MTD Chart if data exists
         const mtdData = metricData.mtd ? metricData.mtd[selectedMonth] : null;
         if (mtdData && mtdCanvas) {
@@ -786,6 +827,47 @@
         const isCurrency =
           selectedMetric === "remittances" || selectedMetric === "lakshmi";
 
+        // --- RENDER SIDE-BY-SIDE MONTHLY BAR CHART ---
+        const barCanvas = document.getElementById("monthlyBarChart");
+        if (barCanvas) {
+          const barCtx = barCanvas.getContext("2d");
+          const monthlyLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          
+          // Map dropdown value to the deduced object properties inside tableData
+          const propertyMap = {
+            totalBooks: "totalBooks",
+            bookPoints: "pts",
+            remittances: "rem",
+            lakshmi: "lakshmi"
+          };
+          const targetProp = propertyMap[selectedMetric];
+        
+          // Pluck discrete monthly totals reliably from the tableData backend arrays
+          const currentYearMonthly = [];
+          const lastYearMonthly = [];
+        
+          for (let m = 1; m <= 12; m++) {
+            const monthObj = dashboardData.tableData?.[m]?.mtd;
+            currentYearMonthly.push(monthObj?.y2?.[targetProp] || 0);
+            lastYearMonthly.push(monthObj?.y1?.[targetProp] || 0);
+          }
+        
+          if (window.monthlyBarChartInstance) {
+            window.monthlyBarChartInstance.destroy();
+          }
+        
+          window.monthlyBarChartInstance = new Chart(
+            barCtx,
+            createBarChartConfig(
+              "Side-by-Side Monthly Comparison",
+              monthlyLabels,
+              currentYearMonthly,
+              lastYearMonthly,
+              isCurrency
+            )
+          );
+        }
+        
         // Destroy existing charts to apply formatting changes cleanly
         if (mtdChartInstance) mtdChartInstance.destroy();
         if (ytdChartInstance) ytdChartInstance.destroy();
