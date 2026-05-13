@@ -570,6 +570,92 @@
         };
       }
 
+      function createBarChartConfig(title, labels, currentYearData, lastYearData, isCurrency = false) {
+        const isLight = document.body.classList.contains("light-mode");
+        const themeColors = {
+          title: isLight ? "#0f172a" : "#f4f6ff",
+          legend: isLight ? "#475569" : "#8c9bb4",
+          tooltipBg: isLight ? "rgba(255, 255, 255, 0.98)" : "rgba(26, 34, 64, 0.98)",
+          tooltipTitle: isLight ? "#0f172a" : "#f4f6ff",
+          tooltipBody: isLight ? "#334155" : "#f4f6ff",
+          tooltipBorder: isLight ? "rgba(217, 119, 6, 0.3)" : "rgba(240,180,41,0.25)",
+          grid: isLight ? "rgba(15, 23, 42, 0.06)" : "rgba(240,180,41,0.08)",
+          ticks: isLight ? "#475569" : "#8c9bb4",
+          lastYearBg: isLight ? "#8c9bb4" : "#6b7499",
+          currentYearBg: isLight ? "#d97706" : "#f0b429"
+        };
+      
+        return {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: lastYearLabel,
+                data: lastYearData,
+                backgroundColor: themeColors.lastYearBg,
+                borderRadius: 4
+              },
+              {
+                label: currentYearLabel,
+                data: currentYearData,
+                backgroundColor: themeColors.currentYearBg,
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: title,
+                font: { size: 18, weight: 700 },
+                color: themeColors.title,
+                padding: { top: 10, bottom: 20 }
+              },
+              legend: {
+                labels: { color: themeColors.legend, font: { size: 13, weight: 500 } }
+              },
+              tooltip: {
+                backgroundColor: themeColors.tooltipBg,
+                titleColor: themeColors.tooltipTitle,
+                bodyColor: themeColors.tooltipBody,
+                borderColor: themeColors.tooltipBorder,
+                borderWidth: 1,
+                padding: 16,
+                boxPadding: 8,
+                callbacks: {
+                  label: function (context) {
+                    let label = context.dataset.label ? context.dataset.label + ": " : "";
+                    if (context.parsed.y !== null) {
+                      let val = new Intl.NumberFormat("en-GB").format(context.parsed.y);
+                      label += isCurrency ? "£" + val : val;
+                    }
+                    return label;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: themeColors.ticks, font: { size: 12, weight: 500 } } },
+              y: { 
+                grid: { color: themeColors.grid, drawBorder: false }, 
+                ticks: { 
+                  color: themeColors.ticks, 
+                  font: { size: 12, weight: 500 },
+                  callback: function (value) {
+                    let formatted = value >= 1000 ? (value / 1000).toFixed(1).replace(/\.0$/, "") + "k" : value;
+                    return isCurrency ? "£" + formatted : formatted;
+                  }
+                } 
+              }
+            }
+          }
+        };
+      }
+      
       // Render the new Data Table
       function renderTable(month) {
         if (
