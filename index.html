@@ -543,15 +543,13 @@
         id: "barValueLabels",
         afterDatasetsDraw(chart, args, pluginOptions) {
           if (!pluginOptions || !pluginOptions.showValues) return;
-          const { ctx, chartArea } = chart;
+          const { ctx } = chart;
           const isCurrency = pluginOptions.isCurrency;
           const isLight = document.body.classList.contains("light-mode");
-          const textColor = isLight ? "#0f172a" : "#f4f6ff";
+          const textColor = isLight ? "#1e293b" : "#f1f5f9";
 
           ctx.save();
           ctx.font = "600 10px 'Inter', sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "bottom";
 
           chart.data.datasets.forEach((dataset, datasetIndex) => {
             const meta = chart.getDatasetMeta(datasetIndex);
@@ -569,16 +567,15 @@
                 formatted = "£" + formatted;
               }
 
-              const x = bar.x;
-              let y = bar.y - 3;
-              if (y < chartArea.top + 12) {
-                y = bar.y + 12;
-                ctx.fillStyle = isLight ? "#ffffff" : "#111827";
-              } else {
-                ctx.fillStyle = textColor;
-              }
-
-              ctx.fillText(formatted, x, y);
+              // Draw vertically rotated (-90 deg) directly above each bar to prevent horizontal smudging
+              ctx.save();
+              ctx.translate(bar.x, bar.y - 6);
+              ctx.rotate(-Math.PI / 2);
+              ctx.textAlign = "left";
+              ctx.textBaseline = "middle";
+              ctx.fillStyle = textColor;
+              ctx.fillText(formatted, 0, 0);
+              ctx.restore();
             });
           });
           ctx.restore();
@@ -642,7 +639,7 @@
         }
       }
 
-      // Custom config for MTD / YTD Line Charts
+      // Original Line Chart Configuration (Preserved 100%)
       function createChartConfig(ctx, title, dataObj, isCurrency = false) {
         const isLight = document.body.classList.contains("light-mode");
         const themeColors = {
@@ -658,26 +655,28 @@
             : "rgba(240,180,41,0.25)",
           grid: isLight ? "rgba(15, 23, 42, 0.06)" : "rgba(240,180,41,0.08)",
           ticks: isLight ? "#475569" : "#8c9bb4",
-          targetBorder: isLight ? "#059669" : "#34c47c",
-          lastYearBorder: isLight ? "#8c9bb4" : "#6b7499",
-          currentYearBorder: isLight ? "#d97706" : "#f0b429",
-          currentYearGradientStart: isLight
-            ? "rgba(217, 119, 6, 0.25)"
-            : "rgba(240, 180, 41, 0.35)",
-          currentYearGradientEnd: isLight
-            ? "rgba(217, 119, 6, 0.0)"
-            : "rgba(240, 180, 41, 0.0)",
+          lastYearLine: isLight ? "#94a3b8" : "#6b7499",
+          currentYearLine: isLight ? "#d97706" : "#f0b429",
+          targetLine: isLight ? "#059669" : "#34c47c",
         };
 
+        // Generate a vibrant glowing gradient for "This Year"
         let gradientFill = ctx.createLinearGradient(
           0,
           0,
           0,
-          ctx.canvas.clientHeight || 300,
+          ctx.canvas.clientHeight,
         );
-        gradientFill.addColorStop(0, themeColors.currentYearGradientStart);
-        gradientFill.addColorStop(1, themeColors.currentYearGradientEnd);
+        gradientFill.addColorStop(
+          0,
+          isLight ? "rgba(224, 123, 16, 0.2)" : "rgba(240, 180, 41, 0.25)",
+        );
+        gradientFill.addColorStop(
+          1,
+          isLight ? "rgba(224, 123, 16, 0.0)" : "rgba(240, 180, 41, 0.0)",
+        );
 
+        // Prepend 0 to make charts start from origin
         const labels = ["0", ...dataObj.labels];
         const y1 = [0, ...dataObj.y1];
         const target = [0, ...dataObj.target];
@@ -689,44 +688,38 @@
             labels: labels,
             datasets: [
               {
-                label: `Target (+20%)`,
-                data: target,
-                borderColor: themeColors.targetBorder,
-                borderWidth: 2,
-                borderDash: [5, 5],
-                pointRadius: 0,
-                pointHoverRadius: 4,
-                pointHitRadius: 10,
-                fill: false,
-                tension: 0.1,
-                order: 3,
-              },
-              {
                 label: lastYearLabel,
                 data: y1,
-                borderColor: themeColors.lastYearBorder,
+                borderColor: themeColors.lastYearLine,
                 borderWidth: 2,
-                pointRadius: 0,
-                pointHoverRadius: 4,
-                pointHitRadius: 10,
                 fill: false,
-                tension: 0.1,
-                order: 2,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0.3,
+              },
+              {
+                label: "Target (+20%)",
+                data: target,
+                borderColor: themeColors.targetLine,
+                borderDash: [5, 5],
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0.3,
               },
               {
                 label: currentYearLabel,
                 data: y2,
-                borderColor: themeColors.currentYearBorder,
+                borderColor: themeColors.currentYearLine,
                 backgroundColor: gradientFill,
-                borderWidth: 3.5,
+                borderWidth: 3,
+                fill: true,
                 pointRadius: 0,
                 pointHoverRadius: 6,
-                pointHoverBackgroundColor: themeColors.currentYearBorder,
-                pointHitRadius: 15,
-                fill: true,
-                tension: 0.1,
+                pointBackgroundColor: themeColors.currentYearLine,
+                tension: 0.3,
                 spanGaps: false,
-                order: 1,
               },
             ],
           },
@@ -743,19 +736,17 @@
                 text: title,
                 font: { size: 18, weight: 700 },
                 color: themeColors.title,
-                padding: { top: 10, bottom: 20 },
+                padding: { top: 10, bottom: 10 },
               },
               legend: {
-                position: "top",
-                align: "end",
                 labels: {
                   color: themeColors.legend,
-                  font: { size: 13, weight: 500 },
-                  boxWidth: 12,
-                  boxHeight: 12,
                   usePointStyle: true,
                   pointStyle: "circle",
-                  padding: 20,
+                  boxWidth: 7,
+                  boxHeight: 7,
+                  padding: 24,
+                  font: { size: 13, weight: 500 },
                 },
               },
               tooltip: {
@@ -765,13 +756,14 @@
                 borderColor: themeColors.tooltipBorder,
                 borderWidth: 1,
                 padding: 16,
+                titleFont: { size: 14, weight: "bold" },
+                bodyFont: { size: 13, weight: 500 },
+                bodySpacing: 10,
+                titleMarginBottom: 12,
                 boxPadding: 8,
+                usePointStyle: true,
                 itemSort: function (a, b) {
-                  const order = { 2: 0, 0: 1, 1: 2 };
-                  return (
-                    (order[a.datasetIndex] ?? 99) -
-                    (order[b.datasetIndex] ?? 99)
-                  );
+                  return b.datasetIndex - a.datasetIndex;
                 },
                 callbacks: {
                   label: function (context) {
@@ -792,23 +784,23 @@
             },
             scales: {
               x: {
-                grid: { display: false },
+                grid: { color: themeColors.grid, drawBorder: false },
                 ticks: {
                   color: themeColors.ticks,
                   font: { size: 12, weight: 500 },
                 },
               },
               y: {
+                beginAtZero: true,
                 grid: { color: themeColors.grid, drawBorder: false },
                 ticks: {
                   color: themeColors.ticks,
                   font: { size: 12, weight: 500 },
                   callback: function (value) {
                     let formatted = value;
-                    if (value >= 1000) {
+                    if (value >= 1000)
                       formatted =
                         (value / 1000).toFixed(1).replace(/\.0$/, "") + "k";
-                    }
                     return isCurrency ? "£" + formatted : formatted;
                   },
                 },
@@ -818,7 +810,7 @@
         };
       }
 
-      // Custom config for Side-by-Side Monthly Bar Chart
+      // Bar Chart Configuration with Target bar and graceful headroom
       function createBarChartConfig(
         title,
         labels,
@@ -935,7 +927,7 @@
                 },
               },
               y: {
-                grace: "8%",
+                grace: "15%",
                 grid: { color: themeColors.grid, drawBorder: false },
                 ticks: {
                   color: themeColors.ticks,
